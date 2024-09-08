@@ -160,7 +160,15 @@ void switch_light_inside(string text, int hour)                 // Переда�
 	}
 }
 
+void temperature_control_inside(int t)
+{
 
+}
+
+void temperature_control_outside(int t)
+{
+
+}
 
 int main()
 {
