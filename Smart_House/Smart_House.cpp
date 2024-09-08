@@ -170,6 +170,59 @@ void temperature_control_outside(int t)
 
 }
 
+void output_time(int c)
+{
+	string time;
+	if (c < 10)
+	{
+		cout << " Время: 0" << c << ":00." << endl;
+	}
+	else
+	{
+		if (c > 9)
+		{
+			cout << " Время: " << c << ":00." << endl;
+		}
+		
+	}
+	for (int j = 0; j < 6; j++)                                          // Цикл for выводит названия датчиков из массива
+	{
+		cout << ' ' << name_switch[j];
+	}
+	cout << endl << " ";
+}
+
+void input_check()
+{
+	bool chek = true;
+	while (chek)                                                             // Цикл продолжается до тех пор, пока пользователь 
+	{                                                                        // не введёт корректное значение
+		cin >> fire_control                                                  // Записываем данные датчиков и переключателей
+			>> flood_control
+			>> motion_sensor
+			>> l_inside
+			>> t_inside
+			>> t_outside;
+
+		if ((cin.fail() || cin.peek() != '\n') ||
+			(fire_control != "ON" && fire_control != "OFF" ||                 // Если предыдущее извлечение оказалось неудачным,
+				flood_control != "ON" && flood_control != "OFF" ||
+				motion_sensor != "ON" && motion_sensor != "OFF" ||
+				l_inside != "ON" && l_inside != "OFF" ||
+				t_inside < -35 && t_inside > 35 ||
+				t_outside < -35 && t_outside > 35))
+		{
+			cerr << " Ошибка ввода данных! Повторите ещё раз!\n ";
+			cin.clear();                                                     // то возвращаем cin в 'обычный' режим работы
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');             // и удаляем значения предыдущего ввода из входного 
+		}                                                                    // буфера
+		else
+		{
+			chek = false;
+		}
+	}
+}
+
 int main()
 {
 	system("chcp 1251>nul");
@@ -178,11 +231,23 @@ int main()
 	cout << " Введите показания приборов в последовательности " << endl;     // Запрашиваем данные датчиков и переключателей
 	cout << " выведенной в консоль, датчик пожара: ON или OFF, " << endl;
 	cout << " датчик затопления: ON или OFF, датчик движения: ON или OFF," << endl;
-	cout << " выключатель в доме: ON или OFF, температура внутренняя: от 0 до 35" << endl;
+	cout << " выключатель в доме: ON или OFF, температура внутренняя: от -35 до 35" << endl;
 	cout << " температура наружняя: от -35 до 35" << endl;
 
+	for (int k = 0; k < 2; k++)                                              // Цикл for отсчитывает двое суток
+	{
+		for (int i = 0; i < 24; ++i)                                         // Вложенный for считает часы от 0 до 23 
+		{
+			output_time(i);
+			input_check();
+			switch_fire_control(fire_control);
+			switch_flood_control(flood_control);
+			switch_motion_sensor(motion_sensor, i);
+			switch_light_inside(l_inside, i);
 
-
+			cout << endl;
+		}
+	}
 	system("pause>nul");
 	return 0;
 }
