@@ -160,14 +160,65 @@ void switch_light_inside(string text, int hour)                 // Переда�
 	}
 }
 
+// Метод по показаниям датчика температуры внутри дома управляет отоплением и кондиционером
 void temperature_control_inside(int t)
 {
+	if (t < 22 &&
+		!(switches_state & HEATERS) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Отопление в доме включено!" << endl;
+		switches_state |= HEATERS;
+	}
 
+	if (t >= 25 &&
+		(switches_state & HEATERS) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Отопление в доме отключено!" << endl;
+		switches_state &= ~HEATERS;
+	}
+
+	if (t >= 30 &&
+		!(switches_state & CONDITIONER) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Кондиционер включен!" << endl;
+		switches_state |= CONDITIONER;
+	}
+
+	if (t <= 25 &&
+		(switches_state & CONDITIONER) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Кондиционер вЫключен!" << endl;
+		switches_state &= ~CONDITIONER;
+	}
 }
-
+// Метод по показаниям датчика наружной температуры управляет электрообогревом трубопровода
 void temperature_control_outside(int t)
 {
+	if ((t < 0) &&
+		!(switches_state & WATER_PIPE_HEATING) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Обогрев трубопровода включен!" << endl;
+		switches_state |= WATER_PIPE_HEATING;
+	}
 
+	if ((t > 5) &&
+		(switches_state & WATER_PIPE_HEATING) &&
+		!(switches_state & POWER_SUPPLY) &&
+		!(switches_state & ELECTRICAL_SOCKETS))
+	{
+		cout << " Обогрев трубопровода отключен!" << endl;
+		switches_state &= ~WATER_PIPE_HEATING;
+	}
 }
 
 void output_time(int c)
@@ -233,6 +284,7 @@ int main()
 	cout << " датчик затопления: ON или OFF, датчик движения: ON или OFF," << endl;
 	cout << " выключатель в доме: ON или OFF, температура внутренняя: от -35 до 35" << endl;
 	cout << " температура наружняя: от -35 до 35" << endl;
+	cout << endl;
 
 	for (int k = 0; k < 2; k++)                                              // Цикл for отсчитывает двое суток
 	{
@@ -244,7 +296,13 @@ int main()
 			switch_flood_control(flood_control);
 			switch_motion_sensor(motion_sensor, i);
 			switch_light_inside(l_inside, i);
+			temperature_control_inside(t_inside);
+			temperature_control_outside(t_outside);
 
+			for (int i = 0; i < 120; i++)
+			{
+				cout << '-';
+			}
 			cout << endl;
 		}
 	}
